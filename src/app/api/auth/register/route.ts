@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import User from '@/models/User'
 import { hashPassword, generateAccessToken, generateRefreshToken } from '@/lib/auth'
+import { sendWelcomeEmail } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
   try {
@@ -39,6 +40,13 @@ export async function POST(req: NextRequest) {
     // Generate tokens
     const accessToken = generateAccessToken(user._id.toString(), user.role)
     const refreshToken = generateRefreshToken(user._id.toString())
+
+    // Send welcome email
+    try {
+      await sendWelcomeEmail(user.email, user.name)
+    } catch (emailError) {
+      console.error('Failed to send welcome email:', emailError)
+    }
 
     return NextResponse.json({
       message: 'User registered successfully',

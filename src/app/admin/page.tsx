@@ -2,314 +2,348 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import {
-  Users,
-  Package,
-  ShoppingCart,
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
+import { 
+  Users, 
+  Package, 
+  ShoppingCart, 
+  DollarSign, 
+  TrendingUp, 
+  Star,
   Eye,
-  Plus,
-  Edit,
-  Trash2
+  Clock,
+  CheckCircle,
+  XCircle,
+  Download,
+  Edit
 } from 'lucide-react'
-import Link from 'next/link'
+import { useAuth } from '@/hooks/useAuth'
+import toast from 'react-hot-toast'
 
 interface DashboardStats {
   totalUsers: number
   totalProducts: number
   totalOrders: number
   totalRevenue: number
-  userGrowth: number
-  productGrowth: number
-  orderGrowth: number
-  revenueGrowth: number
-}
-
-interface RecentActivity {
-  id: string
-  type: 'user' | 'product' | 'order'
-  action: string
-  description: string
-  timestamp: string
+  recentOrders: any[]
+  topProducts: any[]
+  orderStatusCounts: {
+    pending: number
+    confirmed: number
+    processing: number
+    shipped: number
+    delivered: number
+    cancelled: number
+  }
+  monthlyRevenue: {
+    month: string
+    revenue: number
+  }[]
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    totalProducts: 0,
-    totalOrders: 0,
-    totalRevenue: 0,
-    userGrowth: 0,
-    productGrowth: 0,
-    orderGrowth: 0,
-    revenueGrowth: 0
-  })
-  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([])
+  const { user } = useAuth()
+  const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchDashboardData()
+    fetchDashboardStats()
   }, [])
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardStats = async () => {
     try {
-      // In a real app, you would fetch this data from your API
-      // For now, we'll use mock data
-      setStats({
-        totalUsers: 1247,
-        totalProducts: 89,
-        totalOrders: 342,
-        totalRevenue: 45678,
-        userGrowth: 12.5,
-        productGrowth: 8.2,
-        orderGrowth: 15.7,
-        revenueGrowth: 23.4
+      const response = await fetch('/api/admin/dashboard', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        },
       })
-
-      setRecentActivity([
-        {
-          id: '1',
-          type: 'user',
-          action: 'New user registered',
-          description: 'John Doe joined the platform',
-          timestamp: '2 minutes ago'
-        },
-        {
-          id: '2',
-          type: 'order',
-          action: 'New order placed',
-          description: 'Order #1234 for $299.99',
-          timestamp: '5 minutes ago'
-        },
-        {
-          id: '3',
-          type: 'product',
-          action: 'Product updated',
-          description: 'Modern Coffee Table price updated',
-          timestamp: '10 minutes ago'
-        },
-        {
-          id: '4',
-          type: 'user',
-          action: 'User logged in',
-          description: 'Sarah Johnson accessed the site',
-          timestamp: '15 minutes ago'
-        }
-      ])
+      
+      if (!response.ok) throw new Error('Failed to fetch stats')
+      
+      const data = await response.json()
+      setStats(data)
     } catch (error) {
-      console.error('Error fetching dashboard data:', error)
+      toast.error('Failed to load dashboard data')
     } finally {
       setLoading(false)
     }
   }
 
-  const statCards = [
-    {
-      title: 'Total Users',
-      value: stats.totalUsers.toLocaleString(),
-      growth: stats.userGrowth,
-      icon: Users,
-      color: 'bg-blue-500',
-      href: '/admin/users'
-    },
-    {
-      title: 'Total Products',
-      value: stats.totalProducts.toLocaleString(),
-      growth: stats.productGrowth,
-      icon: Package,
-      color: 'bg-green-500',
-      href: '/admin/products'
-    },
-    {
-      title: 'Total Orders',
-      value: stats.totalOrders.toLocaleString(),
-      growth: stats.orderGrowth,
-      icon: ShoppingCart,
-      color: 'bg-purple-500',
-      href: '/admin/orders'
-    },
-    {
-      title: 'Total Revenue',
-      value: `$${stats.totalRevenue.toLocaleString()}`,
-      growth: stats.revenueGrowth,
-      icon: DollarSign,
-      color: 'bg-yellow-500',
-      href: '/admin/analytics'
-    }
-  ]
+  const handleOrderStatusUpdate = async (orderId: string, status: string) => {
+    try {
+      const response = await fetch(`/api/orders/${orderId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+        body: JSON.stringify({ status }),
+      })
 
-  const quickActions = [
-    {
-      title: 'Add Product',
-      description: 'Create a new product listing',
-      icon: Plus,
-      href: '/admin/products/new',
-      color: 'bg-green-500'
-    },
-    {
-      title: 'View Orders',
-      description: 'Check recent orders',
-      icon: Eye,
-      href: '/admin/orders',
-      color: 'bg-blue-500'
-    },
-    {
-      title: 'Manage Users',
-      description: 'View and manage users',
-      icon: Users,
-      href: '/admin/users',
-      color: 'bg-purple-500'
-    },
-    {
-      title: 'Site Settings',
-      description: 'Update website settings',
-      icon: Edit,
-      href: '/admin/settings',
-      color: 'bg-yellow-500'
+      if (!response.ok) throw new Error('Failed to update order')
+
+      toast.success('Order status updated successfully')
+      fetchDashboardStats()
+    } catch (error) {
+      toast.error('Failed to update order status')
     }
-  ]
+  }
+
+  const downloadInvoice = async (orderId: string) => {
+    try {
+      const response = await fetch(`/api/orders/${orderId}/invoice`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      })
+
+      if (!response.ok) throw new Error('Failed to generate invoice')
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `invoice-${orderId}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      toast.success('Invoice downloaded successfully')
+    } catch (error) {
+      toast.error('Failed to download invoice')
+    }
+  }
+
+  if (!user || user.role !== 'admin') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
+          <p className="text-gray-600">You need admin privileges to access this page.</p>
+        </div>
+      </div>
+    )
+  }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-8">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-2">Welcome back! Here's what's happening with your store.</p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat, index) => (
-          <motion.div
-            key={stat.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-          >
-            <Link href={stat.href}>
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
-                    <div className="flex items-center mt-2">
-                      {stat.growth >= 0 ? (
-                        <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                      ) : (
-                        <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
-                      )}
-                      <span className={`text-sm font-medium ${
-                        stat.growth >= 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {Math.abs(stat.growth)}%
-                      </span>
-                      <span className="text-sm text-gray-500 ml-1">from last month</span>
-                    </div>
-                  </div>
-                  <div className={`p-3 rounded-lg ${stat.color}`}>
-                    <stat.icon className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </div>
-            </Link>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Quick Actions */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickActions.map((action, index) => (
-            <motion.div
-              key={action.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
-            >
-              <Link href={action.href}>
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                  <div className={`inline-flex p-3 rounded-lg ${action.color} mb-4`}>
-                    <action.icon className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{action.title}</h3>
-                  <p className="text-gray-600 text-sm">{action.description}</p>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+          <p className="text-gray-600 mt-2">Welcome back, {user.name}!</p>
         </div>
-      </div>
 
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h2>
-          <div className="space-y-4">
-            {recentActivity.map((activity, index) => (
-              <motion.div
-                key={activity.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
-                className="flex items-start space-x-3"
-              >
-                <div className={`w-2 h-2 rounded-full mt-2 ${
-                  activity.type === 'user' ? 'bg-blue-500' :
-                  activity.type === 'product' ? 'bg-green-500' : 'bg-purple-500'
-                }`}></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">{activity.action}</p>
-                  <p className="text-sm text-gray-600">{activity.description}</p>
-                  <p className="text-xs text-gray-500 mt-1">{activity.timestamp}</p>
-                </div>
-              </motion.div>
-            ))}
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Users className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Users</p>
+                <p className="text-2xl font-bold text-gray-900">{stats?.totalUsers}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Package className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Products</p>
+                <p className="text-2xl font-bold text-gray-900">{stats?.totalProducts}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <ShoppingCart className="h-6 w-6 text-yellow-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Orders</p>
+                <p className="text-2xl font-bold text-gray-900">{stats?.totalOrders}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <DollarSign className="h-6 w-6 text-purple-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                <p className="text-2xl font-bold text-gray-900">${stats?.totalRevenue?.toFixed(2)}</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Stats</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active Users Today</p>
-                <p className="text-2xl font-bold text-gray-900">247</p>
+        {/* Order Status Overview */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Status Overview</h2>
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+            <div className="text-center">
+              <div className="p-3 bg-yellow-100 rounded-lg mb-2">
+                <Clock className="h-6 w-6 text-yellow-600 mx-auto" />
               </div>
-              <div className="p-2 bg-green-100 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-green-600" />
-              </div>
+              <p className="text-sm font-medium text-gray-600">Pending</p>
+              <p className="text-lg font-bold text-gray-900">{stats?.orderStatusCounts.pending}</p>
             </div>
-            
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Products Out of Stock</p>
-                <p className="text-2xl font-bold text-gray-900">12</p>
+            <div className="text-center">
+              <div className="p-3 bg-blue-100 rounded-lg mb-2">
+                <Eye className="h-6 w-6 text-blue-600 mx-auto" />
               </div>
-              <div className="p-2 bg-red-100 rounded-lg">
-                <Package className="h-5 w-5 text-red-600" />
-              </div>
+              <p className="text-sm font-medium text-gray-600">Confirmed</p>
+              <p className="text-lg font-bold text-gray-900">{stats?.orderStatusCounts.confirmed}</p>
             </div>
-            
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Pending Orders</p>
-                <p className="text-2xl font-bold text-gray-900">8</p>
+            <div className="text-center">
+              <div className="p-3 bg-indigo-100 rounded-lg mb-2">
+                <TrendingUp className="h-6 w-6 text-indigo-600 mx-auto" />
               </div>
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <ShoppingCart className="h-5 w-5 text-yellow-600" />
-              </div>
+              <p className="text-sm font-medium text-gray-600">Processing</p>
+              <p className="text-lg font-bold text-gray-900">{stats?.orderStatusCounts.processing}</p>
             </div>
+            <div className="text-center">
+              <div className="p-3 bg-orange-100 rounded-lg mb-2">
+                <Package className="h-6 w-6 text-orange-600 mx-auto" />
+              </div>
+              <p className="text-sm font-medium text-gray-600">Shipped</p>
+              <p className="text-lg font-bold text-gray-900">{stats?.orderStatusCounts.shipped}</p>
+            </div>
+            <div className="text-center">
+              <div className="p-3 bg-green-100 rounded-lg mb-2">
+                <CheckCircle className="h-6 w-6 text-green-600 mx-auto" />
+              </div>
+              <p className="text-sm font-medium text-gray-600">Delivered</p>
+              <p className="text-lg font-bold text-gray-900">{stats?.orderStatusCounts.delivered}</p>
+            </div>
+            <div className="text-center">
+              <div className="p-3 bg-red-100 rounded-lg mb-2">
+                <XCircle className="h-6 w-6 text-red-600 mx-auto" />
+              </div>
+              <p className="text-sm font-medium text-gray-600">Cancelled</p>
+              <p className="text-lg font-bold text-gray-900">{stats?.orderStatusCounts.cancelled}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Orders */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Recent Orders</h2>
+            <a 
+              href="/admin/orders" 
+              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            >
+              View All
+            </a>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Order
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Customer
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Total
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {stats?.recentOrders.map((order) => (
+                  <tr key={order._id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {order.orderNumber}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {new Date(order.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {order.user.name}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {order.user.email}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      ${order.total.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                        order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                        order.status === 'shipped' ? 'bg-orange-100 text-orange-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => downloadInvoice(order._id)}
+                          className="text-blue-600 hover:text-blue-900"
+                          title="Download Invoice"
+                        >
+                          <Download size={16} />
+                        </button>
+                        <button
+                          onClick={() => window.location.href = `/admin/orders/${order._id}`}
+                          className="text-green-600 hover:text-green-900"
+                          title="View Details"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <select
+                          value={order.status}
+                          onChange={(e) => handleOrderStatusUpdate(order._id, e.target.value)}
+                          className="text-xs border border-gray-300 rounded px-2 py-1"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="confirmed">Confirmed</option>
+                          <option value="processing">Processing</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="delivered">Delivered</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

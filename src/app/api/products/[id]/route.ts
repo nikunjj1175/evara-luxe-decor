@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import Product from '@/models/Product'
 import { getTokenFromRequest, isAdmin } from '@/lib/auth'
+import { deleteImageFromCloudinary, extractPublicIdFromUrl } from '@/lib/cloudinary'
 
 export async function GET(
   req: NextRequest,
@@ -47,18 +48,38 @@ export async function PUT(
 
     const updateData = await req.json()
 
-    const product = await Product.findByIdAndUpdate(
-      params.id,
-      updateData,
-      { new: true, runValidators: true }
-    )
-
-    if (!product) {
+    // Get the current product to compare images
+    const currentProduct = await Product.findById(params.id)
+    if (!currentProduct) {
       return NextResponse.json(
         { error: 'Product not found' },
         { status: 404 }
       )
     }
+
+    // Delete removed images from Cloudinary
+    if (currentProduct.images && updateData.images) {
+      const removedImages = currentProduct.images.filter(
+        (img: string) => !updateData.images.includes(img)
+      )
+      
+      for (const imageUrl of removedImages) {
+        try {
+          const publicId = extractPublicIdFromUrl(imageUrl)
+          if (publicId) {
+            await deleteImageFromCloudinary(publicId)
+          }
+        } catch (error) {
+          console.error('Error deleting image from Cloudinary:', error)
+        }
+      }
+    }
+
+    const product = await Product.findByIdAndUpdate(
+      params.id,
+      updateData,
+      { new: true, runValidators: true }
+    )
 
     return NextResponse.json({
       message: 'Product updated successfully',
@@ -89,7 +110,7 @@ export async function DELETE(
       )
     }
 
-    const product = await Product.findByIdAndDelete(params.id)
+    const product = await Product.findById(params.id)
 
     if (!product) {
       return NextResponse.json(
@@ -97,6 +118,24 @@ export async function DELETE(
         { status: 404 }
       )
     }
+
+    // Delete images from Cloudinary
+    if (product.images && product.images.length > 0) {
+      try {
+        for (const imageUrl of product.images) {
+          const publicId = extractPublicIdFromUrl(imageUrl)
+          if (publicId) {
+            await deleteImageFromCloudinary(publicId)
+          }
+        }
+      } catch (error) {
+        console.error('Error deleting images from Cloudinary:', error)
+        // Continue with product deletion even if image deletion fails
+      }
+    }
+
+    // Delete the product from database
+    await Product.findByIdAndDelete(params.id)
 
     return NextResponse.json({
       message: 'Product deleted successfully'

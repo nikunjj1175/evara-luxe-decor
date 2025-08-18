@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import { Plus, Edit, Trash2, Eye, EyeOff, Star, TrendingUp } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/hooks/useAuth'
+import ImageUpload from '@/components/ImageUpload'
 
 const productSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -54,7 +55,7 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
-  const [imageUrls, setImageUrls] = useState<string[]>([''])
+  const [uploadedImages, setUploadedImages] = useState<string[]>([])
 
   const {
     register,
@@ -119,7 +120,7 @@ export default function AdminProductsPage() {
       setShowForm(false)
       setEditingProduct(null)
       reset()
-      setImageUrls([''])
+      setUploadedImages([])
       fetchProducts()
     } catch (error) {
       toast.error('Failed to save product')
@@ -137,7 +138,7 @@ export default function AdminProductsPage() {
     setValue('isActive', product.isActive)
     setValue('isFeatured', product.isFeatured)
     setValue('isNewArrival', product.isNewArrival)
-    setImageUrls([...product.images, ''])
+    setUploadedImages(product.images)
     setShowForm(true)
   }
 
@@ -163,21 +164,16 @@ export default function AdminProductsPage() {
     }
   }
 
-  const addImageUrl = () => {
-    setImageUrls([...imageUrls, ''])
+  const handleImageUploaded = (imageUrl: string) => {
+    const newImages = [...uploadedImages, imageUrl]
+    setUploadedImages(newImages)
+    setValue('images', newImages)
   }
 
-  const removeImageUrl = (index: number) => {
-    const newUrls = imageUrls.filter((_, i) => i !== index)
-    setImageUrls(newUrls)
-    setValue('images', newUrls.filter(url => url.trim()))
-  }
-
-  const updateImageUrl = (index: number, value: string) => {
-    const newUrls = [...imageUrls]
-    newUrls[index] = value
-    setImageUrls(newUrls)
-    setValue('images', newUrls.filter(url => url.trim()))
+  const handleImageRemoved = (index: number) => {
+    const newImages = uploadedImages.filter((_, i) => i !== index)
+    setUploadedImages(newImages)
+    setValue('images', newImages)
   }
 
   if (!user || user.role !== 'admin') {
@@ -199,29 +195,22 @@ export default function AdminProductsPage() {
             <h1 className="text-3xl font-bold text-gray-900">Products Management</h1>
             <p className="text-gray-600 mt-2">Manage your product catalog and new arrivals</p>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={() => {
               setShowForm(true)
               setEditingProduct(null)
               reset()
-              setImageUrls([''])
+              setUploadedImages([])
             }}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors"
           >
             <Plus size={20} />
             Add Product
-          </motion.button>
+          </button>
         </div>
 
         {showForm && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="bg-white rounded-lg shadow-lg p-6 mb-8"
-          >
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
             <h2 className="text-2xl font-bold mb-6">
               {editingProduct ? 'Edit Product' : 'Add New Product'}
             </h2>
@@ -315,35 +304,13 @@ export default function AdminProductsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Product Images
                 </label>
-                <div className="space-y-2">
-                  {imageUrls.map((url, index) => (
-                    <div key={index} className="flex gap-2">
-                      <input
-                        type="url"
-                        value={url}
-                        onChange={(e) => updateImageUrl(index, e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="https://example.com/image.jpg"
-                      />
-                      {imageUrls.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeImageUrl(index)}
-                          className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-                        >
-                          Remove
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={addImageUrl}
-                    className="text-blue-600 hover:text-blue-700 text-sm"
-                  >
-                    + Add another image
-                  </button>
-                </div>
+                <ImageUpload
+                  productName={watch('name') || 'product'}
+                  onImageUploaded={handleImageUploaded}
+                  onImageRemoved={handleImageRemoved}
+                  uploadedImages={uploadedImages}
+                  disabled={isSubmitting}
+                />
                 {errors.images && (
                   <p className="text-red-500 text-sm mt-1">{errors.images.message}</p>
                 )}
@@ -388,7 +355,7 @@ export default function AdminProductsPage() {
                     setShowForm(false)
                     setEditingProduct(null)
                     reset()
-                    setImageUrls([''])
+                    setUploadedImages([])
                   }}
                   className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
@@ -403,7 +370,7 @@ export default function AdminProductsPage() {
                 </button>
               </div>
             </form>
-          </motion.div>
+          </div>
         )}
 
         {loading ? (
@@ -439,10 +406,8 @@ export default function AdminProductsPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {products.map((product) => (
-                    <motion.tr
+                    <tr
                       key={product._id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
                       className="hover:bg-gray-50"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -518,7 +483,7 @@ export default function AdminProductsPage() {
                           </button>
                         </div>
                       </td>
-                    </motion.tr>
+                    </tr>
                   ))}
                 </tbody>
               </table>

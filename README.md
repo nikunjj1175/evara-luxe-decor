@@ -68,10 +68,18 @@ The website includes a special "New Arrivals" feature that allows administrators
 - **Frontend**: Added new arrivals section with animations and special styling
 - **Responsive**: Fully responsive design for all screen sizes
 
+### Cloudinary Image Management
+- **Organized Storage**: Images are automatically organized in Cloudinary folders based on product names
+- **Drag & Drop Upload**: Easy image upload with drag & drop functionality
+- **Image Optimization**: Automatic image optimization and format conversion
+- **Cleanup**: Automatic deletion of images when products are deleted or updated
+- **Folder Structure**: `products/{product-name}/` format for easy organization
+
 ## Prerequisites
 
 - Node.js 18+ 
 - MongoDB (local or cloud)
+- Cloudinary account (for image storage)
 - npm or yarn
 
 ## Installation
@@ -87,7 +95,12 @@ The website includes a special "New Arrivals" feature that allows administrators
    npm install
    ```
 
-3. **Set up environment variables**
+3. **Set up Cloudinary**
+   - Create a free account at [Cloudinary](https://cloudinary.com/)
+   - Get your Cloud Name, API Key, and API Secret from the dashboard
+   - These will be used for image uploads and storage
+
+4. **Set up environment variables**
    Create a `.env.local` file in the root directory:
    ```env
    # MongoDB Configuration
@@ -107,17 +120,17 @@ The website includes a special "New Arrivals" feature that allows administrators
    NEXTAUTH_SECRET=your-nextauth-secret-key-change-this-in-production
    ```
 
-4. **Set up MongoDB**
+5. **Set up MongoDB**
    - Install MongoDB locally or use MongoDB Atlas
    - Create a database named `home-decor`
    - Update the `MONGODB_URI` in your `.env.local` file
 
-5. **Run the development server**
+6. **Run the development server**
    ```bash
    npm run dev
    ```
 
-6. **Open your browser**
+7. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 ## Project Structure
@@ -182,6 +195,9 @@ src/
 - `GET /api/products/[id]` - Get single product
 - `PUT /api/products/[id]` - Update product (admin)
 - `DELETE /api/products/[id]` - Delete product (admin)
+
+### Upload
+- `POST /api/upload` - Upload image to Cloudinary (admin)
 
 ### Settings
 - `GET /api/settings` - Get website settings

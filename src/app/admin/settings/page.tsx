@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Save, Globe, Eye, EyeOff, Mail, Phone, Facebook, Instagram, Twitter } from 'lucide-react'
 import toast from 'react-hot-toast'
+import ImageUpload from '@/components/ImageUpload'
 
 const settingsSchema = z.object({
   siteName: z.string().min(1, 'Site name is required'),
@@ -35,6 +36,8 @@ type SettingsForm = z.infer<typeof settingsSchema>
 
 export default function AdminSettings() {
   const [loading, setLoading] = useState(false)
+  const [logoUrl, setLogoUrl] = useState('')
+  const [heroImageUrl, setHeroImageUrl] = useState('')
   const [saving, setSaving] = useState(false)
 
   const {
@@ -224,13 +227,21 @@ export default function AdminSettings() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Hero Image URL
+                Hero Image
               </label>
-              <input
-                {...register('heroImage')}
-                type="url"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Enter hero image URL"
+              <ImageUpload
+                type="hero"
+                onImageUploaded={(url) => {
+                  setHeroImageUrl(url)
+                  setValue('heroImage', url)
+                }}
+                onImageRemoved={() => {
+                  setHeroImageUrl('')
+                  setValue('heroImage', '')
+                }}
+                uploadedImages={heroImageUrl ? [heroImageUrl] : []}
+                disabled={saving}
+                single={true}
               />
             </div>
           </div>

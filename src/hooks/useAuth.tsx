@@ -1,30 +1,22 @@
 'use client'
 
-import { useState, useEffect, createContext, useContext } from 'react'
+import { useEffect, createContext, useContext } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { setUser, setLoading, logout } from '@/store/slices/userSlice'
 import toast from 'react-hot-toast'
 
-interface User {
-  id: string
-  name: string
-  email: string
-  role: string
-  avatar?: string
-}
-
 interface AuthContextType {
-  user: User | null
   login: (email: string, password: string) => Promise<void>
   register: (name: string, email: string, password: string) => Promise<void>
   logout: () => void
-  loading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const dispatch = useAppDispatch()
+  const { user, loading } = useAppSelector(state => state.user)
   const router = useRouter()
 
   useEffect(() => {
@@ -44,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (response.ok) {
           const userData = await response.json()
-          setUser(userData.user)
+          dispatch(setUser(userData.user))
         } else {
           // Token expired, try to refresh
           await refreshToken()
@@ -53,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Auth check error:', error)
     } finally {
-      setLoading(false)
+      dispatch(setLoading(false))
     }
   }
 
@@ -86,20 +78,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (userResponse.ok) {
           const userData = await userResponse.json()
-          setUser(userData.user)
+          dispatch(setUser(userData.user))
         }
       } else {
         throw new Error('Token refresh failed')
       }
     } catch (error) {
       console.error('Token refresh error:', error)
-      logout()
+      dispatch(logout())
     }
   }
 
   const login = async (email: string, password: string) => {
     try {
-      setLoading(true)
+      dispatch(setLoading(true))
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
@@ -113,7 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         localStorage.setItem('accessToken', data.accessToken)
         localStorage.setItem('refreshToken', data.refreshToken)
-        setUser(data.user)
+        dispatch(setUser(data.user))
         toast.success('Login successful!')
         router.push('/')
       } else {
@@ -124,13 +116,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Login error:', error)
       toast.error('Login failed. Please try again.')
     } finally {
-      setLoading(false)
+      dispatch(setLoading(false))
     }
   }
 
   const register = async (name: string, email: string, password: string) => {
     try {
-      setLoading(true)
+      dispatch(setLoading(true))
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
@@ -144,7 +136,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         localStorage.setItem('accessToken', data.accessToken)
         localStorage.setItem('refreshToken', data.refreshToken)
-        setUser(data.user)
+        dispatch(setUser(data.user))
         toast.success('Registration successful!')
         router.push('/')
       } else {
@@ -155,20 +147,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Registration error:', error)
       toast.error('Registration failed. Please try again.')
     } finally {
-      setLoading(false)
+      dispatch(setLoading(false))
     }
   }
 
-  const logout = () => {
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
-    setUser(null)
+  const logoutHandler = () => {
+    dispatch(logout())
     router.push('/')
     toast.success('Logged out successfully')
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ login, register, logout: logoutHandler }}>
       {children}
     </AuthContext.Provider>
   )
