@@ -16,8 +16,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const user = verifyToken(token)
-    if (!user) {
+    const decoded = verifyToken(token)
+    if (!decoded) {
       return NextResponse.json(
         { error: 'Invalid token' },
         { status: 401 }
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const total = subtotal + tax + shipping
 
     const order = new Order({
-      user: user.id,
+      user: decoded.userId,
       items: orderData.items,
       subtotal,
       tax,
@@ -90,8 +90,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const user = verifyToken(token)
-    if (!user) {
+    const decoded = verifyToken(token)
+    if (!decoded) {
       return NextResponse.json(
         { error: 'Invalid token' },
         { status: 401 }
@@ -107,8 +107,8 @@ export async function GET(request: NextRequest) {
     let query: any = {}
     
     // If user is not admin, only show their orders
-    if (user.role !== 'admin') {
-      query.user = user.id
+    if (decoded.role !== 'admin') {
+      query.user = decoded.userId
     }
     
     // Filter by status if provided

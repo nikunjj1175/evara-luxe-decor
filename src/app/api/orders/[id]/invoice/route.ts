@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import Order from '@/models/Order'
 import { getTokenFromRequest, verifyToken } from '@/lib/auth'
+import { generateInvoicePDF } from '@/lib/pdfGenerator'
 
 export async function GET(
   req: NextRequest,
@@ -18,8 +19,8 @@ export async function GET(
       )
     }
 
-    const user = verifyToken(token)
-    if (!user) {
+    const decoded = verifyToken(token)
+    if (!decoded) {
       return NextResponse.json(
         { error: 'Invalid token' },
         { status: 401 }
@@ -38,20 +39,54 @@ export async function GET(
     }
 
     // Check if user is authorized to view this order
-    if (user.role !== 'admin' && order.user.toString() !== user.id) {
+    const orderUserId = (order as any).user && (order as any).user._id
+      ? (order as any).user._id.toString()
+      : (order as any).user.toString()
+    if (decoded.role !== 'admin' && orderUserId !== decoded.userId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    // Generate PDF content
-    const pdfContent = generateInvoicePDFBuffer(order)
+    // Generate PDF document
+    const doc = generateInvoicePDF({
+      orderNumber: (order as any).orderNumber,
+      orderDate: new Date((order as any).createdAt).toLocaleDateString(),
+      customerName: (order as any).user.name,
+      customerEmail: (order as any).user.email,
+      customerPhone: (order as any).user.phone || '',
+      shippingAddress: {
+        name: (order as any).shippingAddress?.name || (order as any).user.name,
+        address: (order as any).shippingAddress?.address || '',
+        city: (order as any).shippingAddress?.city || '',
+        state: (order as any).shippingAddress?.state || '',
+        zipCode: (order as any).shippingAddress?.zipCode || '',
+        country: (order as any).shippingAddress?.country || '',
+      },
+      items: (order as any).items.map((it: any) => ({
+        name: it.product?.name || 'Item',
+        quantity: it.quantity,
+        price: it.price,
+        total: it.total,
+      })),
+      subtotal: (order as any).subtotal,
+      tax: (order as any).tax,
+      shipping: (order as any).shipping,
+      total: (order as any).total,
+      paymentMethod: (order as any).paymentMethod,
+      status: (order as any).status,
+    })
 
-    return new NextResponse(pdfContent, {
+    const arrayBuffer = doc.output('arraybuffer') as ArrayBuffer
+    const pdfBuffer = Buffer.from(arrayBuffer)
+
+    return new NextResponse(pdfBuffer, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="invoice-${order.orderNumber}.pdf"`,
+        'Content-Disposition': `attachment; filename="invoice-${(order as any).orderNumber}.pdf"`,
+        'Content-Length': String(pdfBuffer.length),
+        'Cache-Control': 'no-store',
       },
     })
 

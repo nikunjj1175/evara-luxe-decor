@@ -33,7 +33,7 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { user, loading } = useAuth()
+  const { user, loading, logout } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
@@ -154,7 +154,7 @@ export default function AdminLayout({
                   <p className="text-xs text-gray-500">Administrator</p>
                 </div>
                 <button
-                  onClick={() => router.push('/')}
+                  onClick={() => logout()}
                   className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
                 >
                   <LogOut size={20} />

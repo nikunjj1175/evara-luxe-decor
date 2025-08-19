@@ -6,7 +6,17 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { setUser, setLoading, logout } from '@/store/slices/userSlice'
 import toast from 'react-hot-toast'
 
+type AuthUser = {
+  _id: string
+  name: string
+  email: string
+  role: 'user' | 'admin'
+  avatar?: string
+}
+
 interface AuthContextType {
+  user: AuthUser | null
+  loading: boolean
   login: (email: string, password: string) => Promise<void>
   register: (name: string, email: string, password: string) => Promise<void>
   logout: () => void
@@ -107,7 +117,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('refreshToken', data.refreshToken)
         dispatch(setUser(data.user))
         toast.success('Login successful!')
-        router.push('/')
+        if (data.user.role === 'admin') {
+          router.push('/admin')
+        } else {
+          router.push('/')
+        }
       } else {
         toast.error(data.error || 'Login failed')
         throw new Error(data.error)
@@ -138,7 +152,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('refreshToken', data.refreshToken)
         dispatch(setUser(data.user))
         toast.success('Registration successful!')
-        router.push('/')
+        if (data.user.role === 'admin') {
+          router.push('/admin')
+        } else {
+          router.push('/')
+        }
       } else {
         toast.error(data.error || 'Registration failed')
         throw new Error(data.error)
@@ -158,7 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ login, register, logout: logoutHandler }}>
+    <AuthContext.Provider value={{ user: user as any, loading, login, register, logout: logoutHandler }}>
       {children}
     </AuthContext.Provider>
   )
