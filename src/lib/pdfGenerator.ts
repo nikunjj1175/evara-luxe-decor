@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf'
-import 'jspdf-autotable'
+import autoTable from 'jspdf-autotable'
 
 interface InvoiceData {
   orderNumber: string
@@ -79,23 +79,23 @@ export const generateInvoicePDF = (data: InvoiceData): jsPDF => {
   doc.text(`Phone: ${data.customerPhone}`, 20, 135)
   
   // Items table
-  const tableData = data.items.map(item => [
+  const tableBody = data.items.map(item => [
     item.name,
     item.quantity.toString(),
     `$${item.price.toFixed(2)}`,
     `$${item.total.toFixed(2)}`
   ])
-  
+
   // Add summary rows
-  tableData.push(['', '', 'Subtotal:', `$${data.subtotal.toFixed(2)}`])
-  tableData.push(['', '', 'Tax:', `$${data.tax.toFixed(2)}`])
-  tableData.push(['', '', 'Shipping:', `$${data.shipping.toFixed(2)}`])
-  tableData.push(['', '', 'Total:', `$${data.total.toFixed(2)}`])
-  
-  doc.autoTable({
+  tableBody.push(['', '', 'Subtotal:', `$${data.subtotal.toFixed(2)}`])
+  tableBody.push(['', '', 'Tax:', `$${data.tax.toFixed(2)}`])
+  tableBody.push(['', '', 'Shipping:', `$${data.shipping.toFixed(2)}`])
+  tableBody.push(['', '', 'Total:', `$${data.total.toFixed(2)}`])
+
+  autoTable(doc, {
     startY: 150,
     head: [['Item', 'Qty', 'Price', 'Total']],
-    body: tableData,
+    body: tableBody,
     theme: 'grid',
     headStyles: {
       fillColor: [75, 85, 99],
@@ -114,20 +114,6 @@ export const generateInvoicePDF = (data: InvoiceData): jsPDF => {
       1: { cellWidth: 20, halign: 'center' },
       2: { cellWidth: 30, halign: 'right' },
       3: { cellWidth: 30, halign: 'right' }
-    },
-    didDrawCell: function(data) {
-      // Style the summary rows
-      if (data.row.index >= data.items.length - 4) {
-        if (data.row.index === data.items.length - 1) {
-          // Total row
-          doc.setFontStyle('bold')
-          doc.setTextColor(31, 41, 55)
-        } else {
-          // Other summary rows
-          doc.setFontStyle('normal')
-          doc.setTextColor(75, 85, 99)
-        }
-      }
     }
   })
   
