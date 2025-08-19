@@ -25,6 +25,11 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const { register: registerUser, loading } = useAuth()
+  const MotionDiv = motion.div as any
+  const MotionForm = motion.form as any
+  const MotionH2 = motion.h2 as any
+  const MotionP = motion.p as any
+  const MotionButton = motion.button as any
 
   const {
     register,
@@ -40,32 +45,32 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 py-12 px-4 sm:px-6 lg:px-8">
-      <motion.div
+      <MotionDiv
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="max-w-md w-full space-y-8"
       >
         <div className="text-center">
-          <motion.h2
+          <MotionH2
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-3xl font-bold text-gray-900 mb-2"
           >
             Create Account
-          </motion.h2>
-          <motion.p
+          </MotionH2>
+          <MotionP
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-gray-600"
           >
             Join us and start decorating your dream home
-          </motion.p>
+          </MotionP>
         </div>
 
-        <motion.form
+        <MotionForm
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
@@ -91,13 +96,13 @@ export default function RegisterPage() {
                 />
               </div>
               {errors.name && (
-                <motion.p
+                <MotionP
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-1 text-sm text-red-600"
                 >
                   {errors.name.message}
-                </motion.p>
+                </MotionP>
               )}
             </div>
 
@@ -119,13 +124,13 @@ export default function RegisterPage() {
                 />
               </div>
               {errors.email && (
-                <motion.p
+                <MotionP
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-1 text-sm text-red-600"
                 >
                   {errors.email.message}
-                </motion.p>
+                </MotionP>
               )}
             </div>
 
@@ -158,13 +163,13 @@ export default function RegisterPage() {
                 </button>
               </div>
               {errors.password && (
-                <motion.p
+                <MotionP
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-1 text-sm text-red-600"
                 >
                   {errors.password.message}
-                </motion.p>
+                </MotionP>
               )}
             </div>
 
@@ -197,13 +202,13 @@ export default function RegisterPage() {
                 </button>
               </div>
               {errors.confirmPassword && (
-                <motion.p
+                <MotionP
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-1 text-sm text-red-600"
                 >
                   {errors.confirmPassword.message}
-                </motion.p>
+                </MotionP>
               )}
             </div>
 
@@ -233,7 +238,7 @@ export default function RegisterPage() {
             </div>
 
             {/* Submit Button */}
-            <motion.button
+            <MotionButton
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
@@ -241,7 +246,7 @@ export default function RegisterPage() {
               className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating account...' : 'Create Account'}
-            </motion.button>
+            </MotionButton>
 
             {/* Divider */}
             <div className="relative">
@@ -255,7 +260,7 @@ export default function RegisterPage() {
 
             {/* Social Login Buttons */}
             <div className="grid grid-cols-2 gap-3">
-              <motion.button
+              <MotionButton
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="button"
@@ -280,9 +285,9 @@ export default function RegisterPage() {
                   />
                 </svg>
                 <span className="ml-2">Google</span>
-              </motion.button>
+              </MotionButton>
 
-              <motion.button
+              <MotionButton
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="button"
@@ -292,13 +297,13 @@ export default function RegisterPage() {
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
                 <span className="ml-2">Facebook</span>
-              </motion.button>
+              </MotionButton>
             </div>
           </div>
-        </motion.form>
+        </MotionForm>
 
         {/* Sign In Link */}
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
@@ -313,8 +318,8 @@ export default function RegisterPage() {
               Sign in here
             </Link>
           </p>
-        </motion.div>
-      </motion.div>
+        </MotionDiv>
+      </MotionDiv>
     </div>
   )
 }

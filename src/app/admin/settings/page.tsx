@@ -39,6 +39,7 @@ export default function AdminSettings() {
   const [logoUrl, setLogoUrl] = useState('')
   const [heroImageUrl, setHeroImageUrl] = useState('')
   const [saving, setSaving] = useState(false)
+  const MotionDiv = motion.div as any
 
   const {
     register,
@@ -142,7 +143,7 @@ export default function AdminSettings() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* General Settings */}
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
@@ -183,10 +184,10 @@ export default function AdminSettings() {
               )}
             </div>
           </div>
-        </motion.div>
+        </MotionDiv>
 
         {/* Hero Section Settings */}
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -245,10 +246,10 @@ export default function AdminSettings() {
               />
             </div>
           </div>
-        </motion.div>
+        </MotionDiv>
 
         {/* Content Visibility Settings */}
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -320,10 +321,10 @@ export default function AdminSettings() {
               </label>
             </div>
           </div>
-        </motion.div>
+        </MotionDiv>
 
         {/* Contact Information */}
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
@@ -365,10 +366,10 @@ export default function AdminSettings() {
               )}
             </div>
           </div>
-        </motion.div>
+        </MotionDiv>
 
         {/* Social Media */}
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
@@ -434,10 +435,10 @@ export default function AdminSettings() {
               />
             </div>
           </div>
-        </motion.div>
+        </MotionDiv>
 
         {/* Maintenance Mode */}
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
@@ -478,10 +479,10 @@ export default function AdminSettings() {
               </div>
             )}
           </div>
-        </motion.div>
+        </MotionDiv>
 
         {/* Footer Text */}
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
@@ -503,10 +504,10 @@ export default function AdminSettings() {
               <p className="mt-1 text-sm text-red-600">{errors.footerText.message}</p>
             )}
           </div>
-        </motion.div>
+        </MotionDiv>
 
         {/* Save Button */}
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
@@ -520,7 +521,7 @@ export default function AdminSettings() {
             <Save className="h-5 w-5 mr-2" />
             {saving ? 'Saving...' : 'Save Settings'}
           </button>
-        </motion.div>
+        </MotionDiv>
       </form>
     </div>
   )

@@ -35,6 +35,7 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { user, loading, logout } = useAuth()
   const router = useRouter()
+  const MotionDiv = motion.div as any
 
   useEffect(() => {
     if (!loading && (!user || user.role !== 'admin')) {
@@ -59,7 +60,7 @@ export default function AdminLayout({
       {/* Mobile sidebar overlay */}
       <AnimatePresence>
         {sidebarOpen && (
-          <motion.div
+          <MotionDiv
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -67,7 +68,7 @@ export default function AdminLayout({
             onClick={() => setSidebarOpen(false)}
           >
             <div className="absolute inset-0 bg-gray-600 opacity-75"></div>
-          </motion.div>
+          </MotionDiv>
         )}
       </AnimatePresence>
 
@@ -75,7 +76,7 @@ export default function AdminLayout({
       <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0">
         <AnimatePresence>
           {sidebarOpen && (
-            <motion.div
+            <MotionDiv
               initial={{ x: -256 }}
               animate={{ x: 0 }}
               exit={{ x: -256 }}
@@ -103,7 +104,7 @@ export default function AdminLayout({
                   </Link>
                 ))}
               </nav>
-            </motion.div>
+            </MotionDiv>
           )}
         </AnimatePresence>
 

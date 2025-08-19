@@ -4,6 +4,8 @@ import User from '@/models/User'
 import { getTokenFromRequest, verifyToken } from '@/lib/auth'
 import bcrypt from 'bcryptjs'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     await dbConnect()

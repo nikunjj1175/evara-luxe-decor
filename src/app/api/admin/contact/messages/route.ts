@@ -1,17 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import { getTokenFromRequest, isAdmin } from '@/lib/auth'
-import mongoose from 'mongoose'
+import ContactMessage from '@/models/ContactMessage'
 
-const ContactMessageSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  subject: String,
-  message: String,
-  status: { type: String, enum: ['unread', 'read', 'replied'], default: 'unread' },
-}, { timestamps: true })
-
-const ContactMessage = mongoose.models.ContactMessage || mongoose.model('ContactMessage', ContactMessageSchema)
+export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
   try {

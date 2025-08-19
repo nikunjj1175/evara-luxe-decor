@@ -12,6 +12,11 @@ type AuthUser = {
   email: string
   role: 'user' | 'admin'
   avatar?: string
+  phone?: string
+  address?: string
+  city?: string
+  state?: string
+  zipCode?: string
 }
 
 interface AuthContextType {

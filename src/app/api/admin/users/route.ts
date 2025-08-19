@@ -3,6 +3,8 @@ import dbConnect from '@/lib/db'
 import User from '@/models/User'
 import { getTokenFromRequest, isAdmin } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
   try {
     await dbConnect()

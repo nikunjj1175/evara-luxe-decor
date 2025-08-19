@@ -12,16 +12,20 @@ interface ImageUploadProps {
   uploadedImages: string[]
   disabled?: boolean
   single?: boolean
+  className?: string
+  children?: React.ReactNode
 }
 
 export default function ImageUpload({
   productName = 'product',
-  type = 'product',
+  type = 'avatar',
   onImageUploaded,
   onImageRemoved,
   uploadedImages,
   disabled = false,
-  single = false
+  single = false,
+  className,
+  children,
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -97,6 +101,29 @@ export default function ImageUpload({
     if (files.length > 0) {
       await uploadImage(files[0])
     }
+  }
+
+  if (children) {
+    return (
+      <div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          className="hidden"
+          disabled={disabled || uploading}
+        />
+        <button
+          type="button"
+          className={className}
+          onClick={() => !disabled && fileInputRef.current?.click()}
+          disabled={disabled || uploading}
+        >
+          {children}
+        </button>
+      </div>
+    )
   }
 
   return (

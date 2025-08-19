@@ -19,6 +19,8 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
+export const dynamic = 'force-dynamic'
+
 const checkoutSchema = z.object({
   // Shipping Address
   shippingName: z.string().min(1, 'Name is required'),
