@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useAppDispatch } from '@/store/hooks'
 import { addToCart } from '@/store/slices/cartSlice'
@@ -18,7 +19,9 @@ interface Product {
   reviews?: number
 }
 
-export default function ProductsPage() {
+export const dynamic = 'force-dynamic'
+
+function ProductsContent() {
   const dispatch = useAppDispatch()
   const searchParams = useSearchParams()
   const searchQuery = searchParams.get('search')
@@ -203,5 +206,13 @@ export default function ProductsPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense>
+      <ProductsContent />
+    </Suspense>
   )
 }

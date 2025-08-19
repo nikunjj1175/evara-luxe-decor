@@ -32,6 +32,10 @@ export default function HomePage() {
   const [newArrivals, setNewArrivals] = useState<Product[]>([])
   const [settings, setSettings] = useState<Settings | null>(null)
   const [loading, setLoading] = useState(true)
+  const MotionDiv = motion.div as any
+  const MotionH1 = motion.h1 as any
+  const MotionP = motion.p as any
+  const MotionButton = motion.button as any
 
   useEffect(() => {
     fetchData()
@@ -122,51 +126,51 @@ export default function HomePage() {
         ></div>
         
         <div className="relative z-20 text-center text-white px-4 max-w-4xl mx-auto">
-          <motion.h1
+          <MotionH1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6"
           >
             {settings?.heroTitle || 'Transform Your Home'}
-          </motion.h1>
+          </MotionH1>
           
-          <motion.p
+          <MotionP
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-xl md:text-2xl mb-8 text-gray-200"
           >
             {settings?.heroSubtitle || 'Discover beautiful decor items for every room'}
-          </motion.p>
+          </MotionP>
           
-          <motion.div
+          <MotionDiv
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             <Link href="/products">
-              <motion.button
+              <MotionButton
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="bg-white text-purple-900 px-8 py-4 rounded-lg font-semibold text-lg flex items-center gap-2 hover:bg-gray-100 transition-colors"
               >
                 Shop Now
                 <ArrowRight size={20} />
-              </motion.button>
+              </MotionButton>
             </Link>
             
             <Link href="/categories">
-              <motion.button
+              <MotionButton
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-purple-900 transition-colors"
               >
                 Explore Categories
-              </motion.button>
+              </MotionButton>
             </Link>
-          </motion.div>
+          </MotionDiv>
         </div>
       </section>
 
@@ -174,7 +178,7 @@ export default function HomePage() {
       {settings?.showCategories && (
         <section className="py-20 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
+            <MotionDiv
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
@@ -187,11 +191,11 @@ export default function HomePage() {
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                 Find the perfect decor items for every room in your home
               </p>
-            </motion.div>
+            </MotionDiv>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
               {categories.map((category, index) => (
-                <motion.div
+                <MotionDiv
                   key={category.name}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -199,15 +203,15 @@ export default function HomePage() {
                   viewport={{ once: true }}
                 >
                   <Link href={category.href}>
-                    <motion.div
+                    <MotionDiv
                       whileHover={{ scale: 1.05, y: -5 }}
                       className="bg-white rounded-xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300"
                     >
                       <div className="text-4xl mb-4">{category.icon}</div>
                       <h3 className="font-semibold text-gray-900">{category.name}</h3>
-                    </motion.div>
+                    </MotionDiv>
                   </Link>
-                </motion.div>
+                </MotionDiv>
               ))}
             </div>
           </div>
@@ -218,7 +222,7 @@ export default function HomePage() {
       {settings?.showFeaturedProducts && products.length > 0 && (
         <section className="py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
+            <MotionDiv
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
@@ -231,11 +235,11 @@ export default function HomePage() {
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                 Handpicked items to elevate your home decor
               </p>
-            </motion.div>
+            </MotionDiv>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {products.map((product, index) => (
-                <motion.div
+                <MotionDiv
                   key={product._id}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -243,7 +247,7 @@ export default function HomePage() {
                   viewport={{ once: true }}
                 >
                   <Link href={`/products/${product._id}`}>
-                    <motion.div
+                    <MotionDiv
                       whileHover={{ scale: 1.02 }}
                       className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
                     >
@@ -253,13 +257,13 @@ export default function HomePage() {
                           alt={product.name}
                           className="w-full h-full object-cover"
                         />
-                        <motion.button
+                        <MotionButton
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-lg hover:bg-red-50 transition-colors"
                         >
                           <Heart size={20} className="text-gray-600" />
-                        </motion.button>
+                        </MotionButton>
                       </div>
                       
                       <div className="p-6">
@@ -289,22 +293,22 @@ export default function HomePage() {
                           <span className="text-xl font-bold text-purple-600">
                             {formatPrice(product.price)}
                           </span>
-                          <motion.button
+                          <MotionButton
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
                           >
                             <ShoppingCart size={20} />
-                          </motion.button>
+                          </MotionButton>
                         </div>
                       </div>
-                    </motion.div>
+                    </MotionDiv>
                   </Link>
-                </motion.div>
+                </MotionDiv>
               ))}
             </div>
 
-            <motion.div
+            <MotionDiv
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
@@ -312,15 +316,15 @@ export default function HomePage() {
               className="text-center mt-12"
             >
               <Link href="/products">
-                <motion.button
+                <MotionButton
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="bg-purple-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-purple-700 transition-colors"
                 >
                   View All Products
-                </motion.button>
+                </MotionButton>
               </Link>
-            </motion.div>
+            </MotionDiv>
           </div>
         </section>
       )}
@@ -329,7 +333,7 @@ export default function HomePage() {
       {newArrivals.length > 0 && (
         <section className="py-20 bg-gradient-to-r from-purple-50 to-pink-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
+            <MotionDiv
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
@@ -346,11 +350,11 @@ export default function HomePage() {
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                 Discover the latest additions to our collection - perfect for festivals and special occasions
               </p>
-            </motion.div>
+            </MotionDiv>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {newArrivals.map((product, index) => (
-                <motion.div
+                <MotionDiv
                   key={product._id}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -358,7 +362,7 @@ export default function HomePage() {
                   viewport={{ once: true }}
                 >
                   <Link href={`/products/${product._id}`}>
-                    <motion.div
+                    <MotionDiv
                       whileHover={{ scale: 1.02 }}
                       className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 relative"
                     >
@@ -375,13 +379,13 @@ export default function HomePage() {
                           alt={product.name}
                           className="w-full h-full object-cover"
                         />
-                        <motion.button
+                        <MotionButton
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-lg hover:bg-red-50 transition-colors"
                         >
                           <Heart size={20} className="text-gray-600" />
-                        </motion.button>
+                        </MotionButton>
                       </div>
                       
                       <div className="p-6">
@@ -411,22 +415,22 @@ export default function HomePage() {
                           <span className="text-xl font-bold text-purple-600">
                             {formatPrice(product.price)}
                           </span>
-                          <motion.button
+                          <MotionButton
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
                           >
                             <ShoppingCart size={20} />
-                          </motion.button>
+                          </MotionButton>
                         </div>
                       </div>
-                    </motion.div>
+                    </MotionDiv>
                   </Link>
-                </motion.div>
+                </MotionDiv>
               ))}
             </div>
 
-            <motion.div
+            <MotionDiv
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
@@ -434,15 +438,15 @@ export default function HomePage() {
               className="text-center mt-12"
             >
               <Link href="/products?newArrivals=true">
-                <motion.button
+                <MotionButton
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
                 >
                   View All New Arrivals
-                </motion.button>
+                </MotionButton>
               </Link>
-            </motion.div>
+            </MotionDiv>
           </div>
         </section>
       )}
@@ -451,7 +455,7 @@ export default function HomePage() {
       {settings?.showTestimonials && (
         <section className="py-20 bg-purple-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
+            <MotionDiv
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
@@ -464,11 +468,11 @@ export default function HomePage() {
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                 Don't just take our word for it - hear from our satisfied customers
               </p>
-            </motion.div>
+            </MotionDiv>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {testimonials.map((testimonial, index) => (
-                <motion.div
+                <MotionDiv
                   key={testimonial.name}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -502,7 +506,7 @@ export default function HomePage() {
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </MotionDiv>
               ))}
             </div>
           </div>
@@ -512,7 +516,7 @@ export default function HomePage() {
       {/* Newsletter Section */}
       <section className="py-20 bg-gray-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
+          <MotionDiv
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -531,15 +535,15 @@ export default function HomePage() {
                 placeholder="Enter your email"
                 className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
-              <motion.button
+              <MotionButton
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
               >
                 Subscribe
-              </motion.button>
+              </MotionButton>
             </div>
-          </motion.div>
+          </MotionDiv>
         </div>
       </section>
     </div>

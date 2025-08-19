@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import { getTokenFromRequest, isAdmin } from '@/lib/auth'
-import mongoose from 'mongoose'
-
-const ContactMessage = mongoose.models.ContactMessage || mongoose.model('ContactMessage')
+import ContactMessage from '@/models/ContactMessage'
 
 export async function PUT(
   req: NextRequest,

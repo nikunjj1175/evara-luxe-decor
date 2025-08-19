@@ -141,7 +141,9 @@ export default function ProfilePage() {
                     <ImageUpload
                       type="avatar"
                       single={true}
-                      onUploadComplete={handleAvatarUpdate}
+                      onImageUploaded={handleAvatarUpdate}
+                      onImageRemoved={() => {}}
+                      uploadedImages={[]}
                       className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-700"
                     >
                       <Edit className="w-4 h-4" />
